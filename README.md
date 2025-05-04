@@ -4,11 +4,11 @@ Anna is a feature-rich Discord bot designed to enhance your server with music pl
 
 ## Features
 
-- 🎵 **Music Playback**: Play songs from YouTube, Spotify, and SoundCloud.
-- 📜 **Queue Management**: Add, remove, and view songs in the queue.
-- 🔄 **Loop and History**: Loop songs and view playback history.
-- 🛠️ **Utility Commands**: Includes commands like `/ping`, `/info`, and `/restartbot`.
-- 💾 **Persistent Storage**: Saves songs and playback data using SQLite.
+- **Music Playback**: Play songs from YouTube, Spotify, and SoundCloud.
+- **Queue Management**: Add, remove, and view songs in the queue.
+- **Loop and History**: Loop songs and view playback history.
+- **Utility Commands**: Includes commands like `/ping`, `/info`, and `/restartbot`.
+- **Persistent Storage**: Saves songs and playback data using SQLite.
 
 ## Installation
 
@@ -84,13 +84,14 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Future Updates / TODO List
 
-- [x] 🎶 **Add Support for Spotify and SoundCloud Playback**: Extend the `/play` command to handle Spotify and SoundCloud URLs.
-- [ ] 🔄 **Improve messages**: Use Embeds and buttons to improve the style and functionality of messages. 
-- [ ] 🔄 **Extended functionality**: Add more commands like skipping, volume, pausing, queue viewing etc.
-- [ ] 🔄 **Queue Persistence**: Save and restore the queue state across bot restarts.
-- [ ] 🗂️ **Playlist Management**: Allow users to create, save, and load playlists.
-- [ ] 🧪 **Unit Tests**: Add unit tests for core functionalities.
+- [x] **Add Support for Spotify and SoundCloud Playback**: Extend the `/play` command to handle Spotify and SoundCloud URLs.
+- [ ] **Improve Messages**: Use Embeds and buttons to improve the style and functionality of messages. 
+- [ ] **Extended Functionality**: Add more commands like skipping, volume, pausing, queue viewing etc.
+- [ ] **Playlist Support**: Support queuing of playlists from both youtube and spotify. 
+- [ ] **Queue Persistence**: Save and restore the queue state across bot restarts.
+- [ ] **Playlist Management**: Allow users to create, save, and load playlists.
+- [ ] **Unit Tests**: Add unit tests for core functionalities.
 
 Feel free to suggest additional features by opening an issue or submitting a pull request!
 
-Enjoy using Anna! 🎶
+Enjoy using Anna!
