@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, VoiceBasedChannel, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 import { Bot } from '../../models/bot';
 
 export default {

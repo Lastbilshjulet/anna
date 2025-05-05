@@ -1,14 +1,14 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, TextChannel, VoiceBasedChannel } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel } from '@discordjs/voice';
-import { Bot } from '../../models/bot';
-import { MusicPlayer } from '../../models/musicPlayer';
-import YouTube from 'youtube-sr';
 import { video_basic_info } from 'play-dl';
-import { isYoutubeVideo } from '../../patterns';
-import { join } from "path";
 import { exec } from 'child_process'
-import { Song } from '../../models/interfaces/song';
+import YouTube from 'youtube-sr';
+import { join } from "path";
 import SongEntity from '../../models/entities/songEntity';
+import { MusicPlayer } from '../../models/musicPlayer';
+import { isYoutubeVideo } from '../../utils/patterns';
+import { Song } from '../../models/interfaces/song';
+import { Bot } from '../../models/bot';
 
 export default {
 	data: new SlashCommandBuilder()

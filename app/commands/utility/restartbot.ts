@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, MessageFlags } from "discord.js";
-import { config } from "../../config.js";
+import { config } from "../../utils/config.js";
 import { Bot } from "../../models/bot.js";
 
 export default {
