@@ -81,7 +81,7 @@ export class MusicPlayer {
             const newSong = this.queue.pop();
             this.player.play(createAudioResource(newSong!.path));
             message = `Now playing...`;
-            console.log(`Playing: ${newSong!.title} - ${newSong!.artist}. Duration: ${newSong!.duration}s. Requested by: ${newSong!.requestedBy}. Source: ${newSong!.source}. Path: ${newSong!.path}`);
+            console.log(`Playing: ${newSong!.title} - ${newSong!.artist}. Duration: ${newSong!.duration}s. Requested by: ${newSong!.requestedBy}. Source: ${newSong!.source}. Path: ${newSong!.path}. Times played: ${newSong!.timesPlayed}`);
             song = newSong ?? null;
         }
         return embedSend(this.textChannel, message, song);

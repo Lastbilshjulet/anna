@@ -24,10 +24,10 @@ export default {
 	async autocomplete(bot: Bot, interaction: AutocompleteInteraction) {
 		const focusedValue = interaction.options.getFocused();
         const filtered = bot.availableSongs.filter(choice =>
-            choice.title.toLowerCase().includes(focusedValue.toLowerCase()) || 
-            choice.artist.toLowerCase().includes(focusedValue.toLowerCase()) || 
+            choice.title.toLowerCase().includes(focusedValue.toLowerCase()) ||
+            choice.artist.toLowerCase().includes(focusedValue.toLowerCase()) ||
             focusedValue.toLowerCase().includes(choice.source.toLowerCase())
-        );
+        ).sort((a, b) => b.timesPlayed - a.timesPlayed);
 		await interaction.respond(
 			filtered.map(choice => ({ name: choice.title + ' - ' + choice.artist, value: choice.ytId })),
 		);
@@ -64,6 +64,7 @@ export default {
                     thumbnail: ytInfo.video_details.thumbnails[0]!.url ?? '',
                     duration: ytInfo.video_details.durationInSec ?? 0,
                     requestedBy: interaction.user.username,
+                    timesPlayed: 0,
                 });
                 await fetchedSong.save()
                     .catch((error) => {
@@ -93,6 +94,9 @@ export default {
             } else {
                 return await embedReply(interaction, 'Nothing found from query - ' + song);
             }
+        } else {
+            fetchedSong.timesPlayed += 1;
+            await updateSong(fetchedSong, bot);
         }
         fetchedSong.requestedBy = interaction.user.username;
 
@@ -100,6 +104,17 @@ export default {
         await deferMessage?.delete().catch(console.error);
 	},
 };
+
+async function updateSong(fetchedSong: Song, bot: Bot) {
+    const songEntity = await SongEntity.findOne({ where: { ytId: fetchedSong.ytId } });
+    if (songEntity) {
+        await songEntity.save();
+        bot.availableSongs.set(fetchedSong.ytId, songEntity);
+        console.log(`Updated song: ${songEntity.title}, Times Played: ${songEntity.timesPlayed}`);
+    } else {
+        console.error(`Song with ytId ${fetchedSong.ytId} not found in the database.`);
+    }
+}
 
 async function execPromise(command: string): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
