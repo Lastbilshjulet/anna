@@ -8,6 +8,7 @@ import SongEntity from '../../models/entities/songEntity';
 import { MusicPlayer } from '../../models/musicPlayer';
 import { isYoutubeVideo } from '../../utils/patterns';
 import { Song } from '../../models/interfaces/song';
+import embedReply, { embedSend } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 
 export default {
@@ -37,7 +38,7 @@ export default {
         const voiceChannel = guildMember!.voice.channel;
 
         if (!voiceChannel) {
-            return interaction.editReply({ content: 'You need to be in a voice channel to play a song!' });
+            return await embedReply(interaction, 'You need to be in a voice channel to play a song!');
         }
 
         const song = interaction.options.getString('song');
@@ -67,7 +68,7 @@ export default {
                 await fetchedSong.save()
                     .catch((error) => {
                         console.error('Error saving song to database:', error);
-                        return interaction.editReply({ content: 'Failed to save song to database.' });
+                        return embedReply(interaction, 'Failed to save song to database.');
                     });
                 console.log("Downloading " + title + " from " + fetchedSong.source);
                 const command = `yt-dlp -x --audio-format mp3 -o "${fetchedSong.path}" "${fetchedSong.source}"`;
@@ -75,7 +76,7 @@ export default {
                     .then(({ stdout, stderr }) => {
                         if (stderr) {
                             console.error(`stderr: ${stderr}`);
-                            return interaction.editReply({ content: 'Failed to download the song.' });
+                            return embedReply(interaction, 'Failed to download the song.');
                         }
 
                         console.log(`stdout: ${stdout}`);
@@ -85,12 +86,12 @@ export default {
                     })
                     .catch((error) => {
                         console.error('Error executing command:', error);
-                        return interaction.editReply({ content: 'Failed to download song. ' });
+                        return embedReply(interaction, 'Failed to download the song.');
                     });
                 await deferMessage?.delete().catch(console.error);
                 return;
             } else {
-                return interaction.editReply({ content: 'Nothing found from query - ' + song });
+                return await embedReply(interaction, 'Nothing found from query - ' + song);
             }
         }
         fetchedSong.requestedBy = interaction.user.username;
@@ -117,14 +118,13 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
 
     if (musicPlayer) {
         if (musicPlayer.connection.joinConfig.channelId !== voiceChannel.id) {
-            musicPlayer.textChannel.send({ content: 'You need to be connected to the same voice channel as the bot!' });
-            return;
+            return embedSend(interaction.channel! as TextChannel, 'You need to be connected to the same voice channel as the bot!');
         }
         musicPlayer.play(fetchedSong!);
         return;
     }
     musicPlayer = new MusicPlayer(
-        guildId,
+        voiceChannel.guild,
         interaction,
         interaction.channel! as TextChannel,
         joinVoiceChannel({
