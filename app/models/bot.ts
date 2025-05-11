@@ -1,5 +1,5 @@
 import { REST, ApplicationCommandDataResolvable, Client, Collection, Events, Routes, MessageFlags, Snowflake } from "discord.js";
-import { config } from "../config.js";
+import { config } from "../utils/config.js";
 import { Command } from "./interfaces/command.js";
 import { readdirSync } from "fs";
 import { join } from "path";

@@ -1,4 +1,5 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, VoiceBasedChannel, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
+import embedReply from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 
 export default {
@@ -10,18 +11,18 @@ export default {
         const voiceChannel = guildMember!.voice.channel;
         
         if (!voiceChannel) {
-            return interaction.reply({ content: 'You need to be in a voice channel to disconnect the bot!', flags: MessageFlags.Ephemeral });
+            return await embedReply(interaction, 'You need to be in a voice channel to disconnect the bot!', true);
         }
 
         const musicPlayer = bot.getMusicPlayer(voiceChannel.guild.id);
         if (!musicPlayer) {
-            return interaction.reply({ content: 'The bot is not connected to any voice channel!', flags: MessageFlags.Ephemeral });
+            return await embedReply(interaction, 'The bot is not connected to any voice channel!', true);
         }
 
         if (musicPlayer.connection.joinConfig.channelId !== voiceChannel.id) {
-            return interaction.reply({ content: 'You need to be connected to the same voice channel as the bot!', flags: MessageFlags.Ephemeral });
+            return await embedReply(interaction, 'You need to be connected to the same voice channel as the bot!', true);
         }
         musicPlayer.stopPlaying();
-        return interaction.reply({ content: 'Stopped playing, cleared queue and disconnected from the voice channel!' });
+        return await embedReply(interaction, 'Stopped playing and cleared queue!');
 	},
 };

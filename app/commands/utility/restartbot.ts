@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, MessageFlags } from "discord.js";
-import { config } from "../../config.js";
+import { config } from "../../utils/config.js";
 import { Bot } from "../../models/bot.js";
+import embedReply from "../../utils/embedReply.js";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -8,10 +9,10 @@ export default {
 		.setDescription('Replies with Pong!'),
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
 		if (interaction.user.id !== config.ownerId) {
-			return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.Ephemeral });
+			return await embedReply(interaction, 'You are not allowed to use this command!', true);
 		}
 		console.log('Restarting bot...');
-		await interaction.reply({ content: 'Restarting bot...', flags: MessageFlags.Ephemeral });
+        await embedReply(interaction, 'Restarting bot..', true);
 		process.exit(0);
 	},
 };

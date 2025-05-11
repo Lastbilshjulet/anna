@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import embedReply from "../../utils/embedReply.js";
 import { Bot } from '../../models/bot';
 
 const data = new SlashCommandBuilder()
@@ -21,14 +22,13 @@ export default {
 			const user = interaction.options.getUser('target');
 
 			if (user) {
-				await interaction.reply(`Username: ${user.username}\nID: ${user.id}`);
-			}
-			else {
-				await interaction.reply(`Your username: ${interaction.user.username}\nYour ID: ${interaction.user.id}`);
+                return await embedReply(interaction, `Username: ${user.username}\nID: ${user.id}`);
+			} else {
+                return await embedReply(interaction, `Your username: ${interaction.user.username}\nYour ID: ${interaction.user.id}`);
 			}
 		}
-		else if (interaction.options.getSubcommand() === 'server') {
-			await interaction.reply(`Server name: ${interaction.guild!.name}\nTotal members: ${interaction.guild!.memberCount}`);
+        else if (interaction.options.getSubcommand() === 'server') {
+            return await embedReply(interaction, `Server name: ${interaction.guild!.name}\nTotal members: ${interaction.guild!.memberCount}`);
 		}
 	},
 };

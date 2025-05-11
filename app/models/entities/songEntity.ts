@@ -26,6 +26,9 @@ class SongEntity extends Model<Song> {
 
     @Column(DataType.INTEGER)
     declare duration: number;
+
+    @Column(DataType.INTEGER)
+    declare timesPlayed: number;
 }
 
 export default SongEntity;

@@ -1,24 +1,26 @@
-import { Snowflake, CommandInteraction, TextChannel } from "discord.js";
+import { Snowflake, CommandInteraction, TextChannel, Guild } from "discord.js";
 import { VoiceConnectionState, VoiceConnectionStatus, createAudioResource, AudioPlayer, createAudioPlayer, VoiceConnection, NoSubscriberBehavior, AudioPlayerState, AudioPlayerStatus } from "@discordjs/voice";
 import { Queue } from "./queue.js";
 import { Song } from "./interfaces/song.js";
+import { embedSend } from "../utils/embedReply.js";
 
 export class MusicPlayer {
-    public guildId: Snowflake;
+    public guild: Guild;
     public interaction: CommandInteraction;
     public connection: VoiceConnection;
     public player: AudioPlayer;
     public textChannel: TextChannel;
     public queue: Queue;
+    public dcInterval: NodeJS.Timeout;
     public shouldLeave: boolean = false;
 
     public constructor(
-        guildId: Snowflake,
+        guild: Guild,
         interaction: CommandInteraction,
         textChannel: TextChannel,
         connection: VoiceConnection,
     ) {
-        this.guildId = guildId;
+        this.guild = guild;
         this.interaction = interaction;
         this.textChannel = textChannel;
         this.connection = connection;
@@ -32,19 +34,17 @@ export class MusicPlayer {
         this.connection.subscribe(this.player);
 
         this.connection.on('stateChange', (oldState: VoiceConnectionState, newState: VoiceConnectionState) => {
-            console.log(`Connection transitioned from ${oldState.status} to ${newState.status}`);
         });
 
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
-            console.log(`Audio player transitioned from ${oldState.status} to ${newState.status}`);
             if (oldState.status !== AudioPlayerStatus.Idle && newState.status === AudioPlayerStatus.Idle) {
                 this.processQueue();
             }
         });
 
-        setInterval(() => {
+        this.dcInterval = setInterval(() => {
             if (this.shouldLeave && this.connection.state.status === VoiceConnectionStatus.Ready && this.player.state.status === AudioPlayerStatus.Idle) {
-                this.textChannel.send('Queue is empty! Leaving voice channel...')
+                this.textChannel.send('Nothing is playing! Leaving voice channel...')
                     .then((msg) => setTimeout(() => msg.delete(), 30_000))
                     .catch(console.error);
                 this.connection.destroy();
@@ -65,26 +65,25 @@ export class MusicPlayer {
 
     public stopPlaying() {
         this.player.stop(true);
-        this.shouldLeave = true;
         console.log('Stopped playing, cleared queue and disconnected!');
+        this.dcInterval.unref();
     }
 
     private processQueue() {
         if (this.queue.isEmpty()) {
             this.shouldLeave = true;
-            return;
+            return embedSend(this.textChannel, "Queue is empty!");
         }
+        this.shouldLeave = false;
+        let message = "Adding to queue...";
+        let song = this.queue.getLastSong();
         if (this.player.state.status === AudioPlayerStatus.Idle) {
             const newSong = this.queue.pop();
             this.player.play(createAudioResource(newSong!.path));
-            console.log(`Playing: ${newSong!.title}`);
-            this.textChannel.send(`Now playing: ${newSong!.title}`)
-                .then((msg) => setTimeout(() => msg.delete(), 120_000))
-                .catch(console.error);
-            return;
+            message = `Now playing...`;
+            console.log(`Playing: ${newSong!.title} - ${newSong!.artist}. Duration: ${newSong!.duration}s. Requested by: ${newSong!.requestedBy}. Source: ${newSong!.source}. Path: ${newSong!.path}. Times played: ${newSong!.timesPlayed}`);
+            song = newSong ?? null;
         }
-        this.textChannel.send('Already playing a song! Adding to queue...')
-                .then((msg) => setTimeout(() => msg.delete(), 30_000))
-                .catch(console.error);
+        return embedSend(this.textChannel, message, song);
     }
 }
