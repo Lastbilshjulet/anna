@@ -7,4 +7,5 @@ export interface Song {
     path: string;
     requestedBy: string;
     duration: number;
+    timesPlayed: number;
 };
