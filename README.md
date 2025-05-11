@@ -56,6 +56,7 @@ Anna is a feature-rich Discord bot designed to enhance your server with music pl
 ### Prerequisites
 - Node.js v16 or higher
 - SQLite3
+- yt-dlp
 
 ### Scripts
 - `npm run dev`: Runs the bot in development mode.
@@ -77,6 +78,7 @@ This project is licensed under the [MIT License](./LICENSE).
 - [Discord.js](https://discord.js.org/) for the Discord API wrapper.
 - [YouTube-SR](https://github.com/DevSnowflake/youtube-sr) for YouTube search functionality.
 - [Play-DL](https://github.com/play-dl/play-dl) for media extraction.
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) for YouTube download.
 
 ## Future Updates / TODO List
 
