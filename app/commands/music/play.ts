@@ -8,7 +8,7 @@ import SongEntity from '../../models/entities/songEntity';
 import { MusicPlayer } from '../../models/musicPlayer';
 import { isYoutubeVideo } from '../../utils/patterns';
 import { Song } from '../../models/interfaces/song';
-import embedReply, { embedSend } from '../../utils/embedReply';
+import embedReply, { embedSend, getDuration } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 
 export default {
@@ -29,7 +29,7 @@ export default {
             focusedValue.toLowerCase().includes(choice.source.toLowerCase())
         ).sort((a, b) => b.timesPlayed - a.timesPlayed);
 		await interaction.respond(
-			filtered.map(choice => ({ name: choice.title + ' - ' + choice.artist, value: choice.ytId })),
+			filtered.map(choice => ({ name: choice.title + ' - ' + choice.artist + ' | ' + getDuration(choice.duration), value: choice.ytId })),
 		);
 	},
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {

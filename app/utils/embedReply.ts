@@ -32,6 +32,6 @@ export async function embedSend(textChannel: TextChannel, content: string, song:
     }).then((msg) => setTimeout(() => msg.delete().catch(console.error), song ? song.duration * 1_000 : 60_000));
 }
 
-function getDuration(duration: number) {
+export function getDuration(duration: number) {
     return `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}`;
 }
