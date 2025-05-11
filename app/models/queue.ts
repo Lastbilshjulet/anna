@@ -37,4 +37,11 @@ export class Queue {
     public isEmpty() {
         return this.songs.length === 0;
     }
+
+    public getLastSong() {
+        if (this.isEmpty()) {
+            return null;
+        }
+        return this.songs[this.songs.length - 1];
+    }
 };
