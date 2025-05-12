@@ -1,28 +1,22 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import embedReply from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
+import voiceChannelCheck from '../../utils/voiceChannelCheck';
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName('disconnect')
 		.setDescription('Disconnects the bot from voice channel.'),
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
-        const guildMember = interaction.guild!.members.cache.get(interaction.user.id);
-        const voiceChannel = guildMember!.voice.channel;
-        
-        if (!voiceChannel) {
-            return await embedReply(interaction, 'You need to be in a voice channel to disconnect the bot!', true);
-        }
+        const result = await voiceChannelCheck(bot, interaction);
+        if ('voiceChannel' in result && 'musicPlayer' in result) {
+            const { voiceChannel, musicPlayer } = result;
 
-        const musicPlayer = bot.getMusicPlayer(voiceChannel.guild.id);
-        if (!musicPlayer) {
-            return await embedReply(interaction, 'The bot is not connected to any voice channel!', true);
+            musicPlayer.stopAndDisconnect();
+            bot.musicPlayers.delete(voiceChannel.guild.id);
+            return await embedReply(interaction, 'Stopped playing and cleared queue!');
+        } else {
+            return await embedReply(interaction, 'Failed to disconnect: Invalid voice channel or music player.');
         }
-
-        if (musicPlayer.connection.joinConfig.channelId !== voiceChannel.id) {
-            return await embedReply(interaction, 'You need to be connected to the same voice channel as the bot!', true);
-        }
-        musicPlayer.stopPlaying();
-        return await embedReply(interaction, 'Stopped playing and cleared queue!');
 	},
 };

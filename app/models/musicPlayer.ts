@@ -65,6 +65,11 @@ export class MusicPlayer {
 
     public stopPlaying() {
         this.player.stop(true);
+    }
+
+    public stopAndDisconnect() {
+        this.queue = new Queue();
+        this.connection.destroy();
         console.log('Stopped playing, cleared queue and disconnected!');
         this.dcInterval.unref();
     }

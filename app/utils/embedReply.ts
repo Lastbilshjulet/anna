@@ -29,7 +29,7 @@ export async function embedSend(textChannel: TextChannel, content: string, song:
     }
     return await textChannel.send({
         embeds: [embed],
-    }).then((msg) => setTimeout(() => msg.delete().catch(console.error), song ? song.duration * 1_000 : 60_000));
+    }).then((msg) => setTimeout(() => msg.delete().catch(console.error), song && content === "Now playing..." ? song.duration * 1_000 : 60_000));
 }
 
 export function getDuration(duration: number) {
