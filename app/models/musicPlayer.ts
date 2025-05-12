@@ -84,7 +84,9 @@ export class MusicPlayer {
         let song = this.queue.getLastSong();
         if (this.player.state.status === AudioPlayerStatus.Idle) {
             const newSong = this.queue.pop();
-            this.player.play(createAudioResource(newSong!.path));
+            const resource = createAudioResource(newSong!.path, { inlineVolume: true });
+            resource.volume!.setVolume(0.1);
+            this.player.play(resource);
             message = `Now playing...`;
             console.log(`Playing: ${newSong!.title} - ${newSong!.artist}. Duration: ${newSong!.duration}s. Requested by: ${newSong!.requestedBy}. Source: ${newSong!.source}. Path: ${newSong!.path}. Times played: ${newSong!.timesPlayed}`);
             song = newSong ?? null;
