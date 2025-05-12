@@ -82,7 +82,8 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Future Updates / TODO List
 
-- [x] **Add Support for Spotify and SoundCloud Playback**: Extend the `/play` command to handle Spotify and SoundCloud URLs.
+- [x] **Add Support for SoundCloud Playback**: Extend the `/play` command to handle SoundCloud URLs.
+- [ ] **Add Support for Spotify Playback**: Extend the `/play` command to handle Spotify URLs.
 - [x] **Improve messages**: Use Embeds and buttons to improve the style and functionality of messages. 
 - [ ] **Extended functionality**: Add more commands like skipping, volume, pausing, queue viewing etc.
 - [ ] **Playlist Support**: Support queuing of playlists from both youtube and spotify. 
