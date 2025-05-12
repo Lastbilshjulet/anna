@@ -4,9 +4,12 @@ import { video_basic_info } from 'play-dl';
 import { exec } from 'child_process'
 import YouTube from 'youtube-sr';
 import { join } from "path";
+import axios from 'axios';
+import cheerio from 'cheerio';
+import puppeteer from 'puppeteer';
 import SongEntity from '../../models/entities/songEntity';
 import { MusicPlayer } from '../../models/musicPlayer';
-import { isYoutubeVideo } from '../../utils/patterns';
+import { isYoutubeVideo, isSoundcloud, isMobileSoundcloud, isSpotifyURL } from '../../utils/patterns';
 import { Song } from '../../models/interfaces/song';
 import embedReply, { embedSend, getDuration } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
@@ -45,34 +48,15 @@ export default {
         let fetchedSong = bot.availableSongs.get(song ?? '');
 
         if (!fetchedSong) {
-            let ytInfo;
-            if (!isYoutubeVideo.test(song ?? '')) {
-                const searchResult = await YouTube.searchOne(song ?? '');
-                ytInfo = await video_basic_info(searchResult.id ?? '');
-            } else { // TODO: Add soundcloud and spotify searches
-                ytInfo = await video_basic_info(song ?? '');
-            }
-            if (ytInfo) {
-                const songsDir = join(__dirname, "..", "..", "..", "songs");
-                const title = (ytInfo.video_details.title ?? '').replace(/[^a-zA-Z0-9]/g, "_") + '.mp3';
-                const fetchedSong = SongEntity.build({
-                    ytId: ytInfo.video_details.id ?? '',
-                    title: ytInfo.video_details.title ?? '',
-                    artist: ytInfo.video_details.channel?.name ?? '',
-                    source: ytInfo.video_details.url ?? '',
-                    path: join(songsDir, title),
-                    thumbnail: ytInfo.video_details.thumbnails[0]!.url ?? '',
-                    duration: ytInfo.video_details.durationInSec ?? 0,
-                    requestedBy: interaction.user.username,
-                    timesPlayed: 0,
-                });
-                await fetchedSong.save()
+            let newSongDetails = await fetchSongMetadata(song ?? '', interaction.user.username);
+            if (newSongDetails) {
+                await newSongDetails.save()
                     .catch((error) => {
                         console.error('Error saving song to database:', error);
                         return embedReply(interaction, 'Failed to save song to database.');
                     });
-                console.log("Downloading " + title + " from " + fetchedSong.source);
-                const command = `yt-dlp -x --audio-format mp3 -o "${fetchedSong.path}" "${fetchedSong.source}"`;
+                console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
+                const command = `yt-dlp -x --audio-format mp3 -o "${newSongDetails.path}" "${newSongDetails.source}"`;
                 await execPromise(command)
                     .then(({ stdout, stderr }) => {
                         if (stderr) {
@@ -82,8 +66,8 @@ export default {
 
                         console.log(`stdout: ${stdout}`);
 
-                        fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, fetchedSong!);
-                        console.log("Downloading to " + fetchedSong!.path);
+                        fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, newSongDetails!);
+                        console.log("Downloading to " + newSongDetails!.path);
                     })
                     .catch((error) => {
                         console.error('Error executing command:', error);
@@ -94,11 +78,10 @@ export default {
             } else {
                 return await embedReply(interaction, 'Nothing found from query - ' + song);
             }
-        } else {
-            fetchedSong.timesPlayed += 1;
-            await updateSong(fetchedSong, bot);
         }
         fetchedSong.requestedBy = interaction.user.username;
+        fetchedSong.timesPlayed += 1;
+        await updateSong(fetchedSong, bot);
 
         await fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, fetchedSong!);
         await deferMessage?.delete().catch(console.error);
@@ -151,4 +134,67 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
     bot.musicPlayers.set(guildId, musicPlayer);
     bot.availableSongs.set(fetchedSong!.ytId, fetchedSong!);
     musicPlayer.play(fetchedSong!);
+}
+
+async function fetchSongMetadata(song: string, requestedBy: string) {
+    try {
+        const songsDir = join(__dirname, "..", "..", "..", "songs");
+        if (isSoundcloud.test(song) || isMobileSoundcloud.test(song) || isSpotifyURL.test(song)) {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.goto(song, { waitUntil: 'domcontentloaded' });
+        
+            await page.waitForSelector('.soundTitle__usernameHeroContainer .sc-link-secondary');
+            await page.waitForSelector('.playbackTimeline__duration [aria-hidden]');
+
+            const metadata = await page.evaluate(() => {
+                const idText = document.querySelector('meta[property="al:android:url"]')?.getAttribute('content');
+                const id = idText ? idText.split(':')[1] : '';
+                const title = document.querySelector('meta[property="og:title"]')?.getAttribute('content');
+                const artistElement = document.querySelector('.soundTitle__usernameHeroContainer .sc-link-secondary');
+                const artist = artistElement && artistElement.textContent ? artistElement.textContent.trim() : 'Unknown artist';
+                const thumbnail = document.querySelector('meta[property="og:image"]')?.getAttribute('content');
+                const durationElement = document.querySelector('.playbackTimeline__duration [aria-hidden]');
+                const duration = durationElement && durationElement.textContent ? durationElement.textContent.split(':').reduce((acc, time) => (60 * acc) + +time, 0) : 0;
+                return { id, title, artist, thumbnail, duration };
+            });
+            await browser.close();
+
+            const formattedTitle = (metadata.title ?? '').replace(/[^a-zA-Z0-9]/g, "_") + '.mp3';
+            return SongEntity.build({
+                ytId: metadata.id ?? '',
+                title: metadata.title ?? '',
+                artist: metadata.artist ?? '',
+                source: song ?? '',
+                path: join(songsDir, formattedTitle),
+                thumbnail: metadata.thumbnail ?? '',
+                duration: metadata.duration,
+                requestedBy: requestedBy,
+                timesPlayed: 0,
+            });
+        } else {
+            let ytInfo;
+            if (isYoutubeVideo.test(song)) {
+                ytInfo = await video_basic_info(song);
+            } else {
+                const searchResult = await YouTube.searchOne(song);
+                ytInfo = await video_basic_info(searchResult.id ?? '');
+            }
+            const title = (ytInfo.video_details.title ?? '').replace(/[^a-zA-Z0-9]/g, "_") + '.mp3';
+            return SongEntity.build({
+                ytId: ytInfo.video_details.id ?? '',
+                title: ytInfo.video_details.title ?? '',
+                artist: ytInfo.video_details.channel?.name ?? '',
+                source: ytInfo.video_details.url ?? '',
+                path: join(songsDir, title),
+                thumbnail: ytInfo.video_details.thumbnails[0]!.url ?? '',
+                duration: ytInfo.video_details.durationInSec ?? 0,
+                requestedBy: requestedBy,
+                timesPlayed: 0,
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching song metadata:', error);
+        return null;
+    }
 }
