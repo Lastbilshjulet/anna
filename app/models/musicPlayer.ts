@@ -1,5 +1,5 @@
 import { Snowflake, CommandInteraction, TextChannel, Guild } from "discord.js";
-import { VoiceConnectionState, VoiceConnectionStatus, createAudioResource, AudioPlayer, createAudioPlayer, VoiceConnection, NoSubscriberBehavior, AudioPlayerState, AudioPlayerStatus } from "@discordjs/voice";
+import { VoiceConnectionState, VoiceConnectionStatus, createAudioResource, AudioPlayer, createAudioPlayer, VoiceConnection, NoSubscriberBehavior, AudioPlayerState, AudioPlayerStatus, AudioResource } from "@discordjs/voice";
 import { Queue } from "./queue.js";
 import { Song } from "./interfaces/song.js";
 import { embedSend } from "../utils/embedReply.js";
@@ -13,6 +13,7 @@ export class MusicPlayer {
     public queue: Queue;
     public dcInterval: NodeJS.Timeout;
     public shouldLeave: boolean = false;
+    public currentResouce: AudioResource | null = null;
 
     public constructor(
         guild: Guild,
@@ -63,7 +64,21 @@ export class MusicPlayer {
         this.processQueue();
     }
 
+    public volume(volumeDiff: number|null = null) {
+        if (this.currentResouce) {
+            const currentVolume = this.currentResouce.volume?.volume ?? 0;
+            if (volumeDiff) {
+                this.currentResouce.volume!.setVolume(currentVolume + volumeDiff);
+                console.log(`Volume changed from ${currentVolume} to ${currentVolume + volumeDiff}`);
+                return currentVolume + volumeDiff;
+            }
+            return currentVolume;
+        }
+        return -1;
+    }
+
     public stopPlaying() {
+        this.currentResouce = null;
         this.player.stop(true);
     }
 
@@ -84,7 +99,9 @@ export class MusicPlayer {
         let song = this.queue.getLastSong();
         if (this.player.state.status === AudioPlayerStatus.Idle) {
             const newSong = this.queue.pop();
-            this.player.play(createAudioResource(newSong!.path));
+            this.currentResouce = createAudioResource(newSong!.path, { inlineVolume: true });
+            this.currentResouce.volume!.setVolume(0.1);
+            this.player.play(this.currentResouce);
             message = `Now playing...`;
             console.log(`Playing: ${newSong!.title} - ${newSong!.artist}. Duration: ${newSong!.duration}s. Requested by: ${newSong!.requestedBy}. Source: ${newSong!.source}. Path: ${newSong!.path}. Times played: ${newSong!.timesPlayed}`);
             song = newSong ?? null;

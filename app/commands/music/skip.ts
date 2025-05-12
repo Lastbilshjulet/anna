@@ -14,8 +14,7 @@ export default {
 
             musicPlayer.stopPlaying();
             return await embedReply(interaction, 'Skipping currently playing song!');
-        } else {
-            return await embedReply(interaction, 'Failed to skip: Invalid music player.');
         }
+        return result;
 	},
 };
