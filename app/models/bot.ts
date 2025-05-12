@@ -83,19 +83,19 @@ export class Bot {
         };
 
         console.log(`Registering ${this.slashCommands.length} slash commands. ${Array.from(this.slashCommandsMap.keys()).join(", ")}`);
-        // try {
-        //     const response = await rest.put(
-        //         Routes.applicationCommands(config.clientId),
-        //         { body: this.slashCommands }
-        //     );
-        //     if (Array.isArray(response)) {
-        //         console.log(`Successfully registered ${response.length} application commands.`);
-        //     } else {
-        //         console.error("Unexpected response type while registering application commands.");
-        //     }
-        // } catch (error) {
-        //     console.error("Error registering application commands:", error);
-        // }
+        try {
+            const response = await rest.put(
+                Routes.applicationCommands(config.clientId),
+                { body: this.slashCommands }
+            );
+            if (Array.isArray(response)) {
+                console.log(`Successfully registered ${response.length} application commands.`);
+            } else {
+                console.error("Unexpected response type while registering application commands.");
+            }
+        } catch (error) {
+            console.error("Error registering application commands:", error);
+        }
     }
     
     private isChatInputCommandListener() {

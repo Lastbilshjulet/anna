@@ -4,8 +4,6 @@ import { video_basic_info } from 'play-dl';
 import { exec } from 'child_process'
 import YouTube from 'youtube-sr';
 import { join } from "path";
-import axios from 'axios';
-import cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
 import SongEntity from '../../models/entities/songEntity';
 import { MusicPlayer } from '../../models/musicPlayer';
