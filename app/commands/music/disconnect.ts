@@ -12,7 +12,7 @@ export default {
         if ('voiceChannel' in result && 'musicPlayer' in result) {
             const { voiceChannel, musicPlayer } = result;
 
-            musicPlayer.stopPlaying();
+            musicPlayer.stopAndDisconnect();
             bot.musicPlayers.delete(voiceChannel.guild.id);
             return await embedReply(interaction, 'Stopped playing and cleared queue!');
         } else {
