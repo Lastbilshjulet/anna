@@ -45,6 +45,8 @@ Anna is a feature-rich Discord bot designed to enhance your server with music pl
 ### Music Commands
 - `/play [song]`: Plays a song in the voice channel.
 - `/disconnect`: Disconnects the bot from the voice channel.
+- `/skip`: Skips the currently playing song.
+- `/volume ?[volume]`: Gets or sets the volume of the current song.
 
 ### Utility Commands
 - `/ping`: Checks the bot's latency.
@@ -82,14 +84,15 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Future Updates / TODO List
 
-- [x] **Add Support for SoundCloud Playback**: Extend the `/play` command to handle SoundCloud URLs.
+- [ ] **Add interactive buttons**: Use buttons to improve the functionality of messages. 
 - [ ] **Add Support for Spotify Playback**: Extend the `/play` command to handle Spotify URLs.
-- [x] **Improve messages**: Use Embeds and buttons to improve the style and functionality of messages. 
-- [ ] **Extended functionality**: Add more commands like skipping, volume, pausing, queue viewing etc.
+- [ ] **Extended functionality**: Add more commands like pausing, queue viewing etc.
 - [ ] **Playlist Support**: Support queuing of playlists from both youtube and spotify. 
 - [ ] **Queue Persistence**: Save and restore the queue state across bot restarts.
 - [ ] **Playlist Management**: Allow users to create, save, and load playlists.
 - [ ] **Unit Tests**: Add unit tests for core functionalities.
+- [x] **Improve messages**: Use Embeds to improve the style of messages. 
+- [x] **Add Support for SoundCloud Playback**: Extend the `/play` command to handle SoundCloud URLs.
 - [x] **Order autocomplete by popularity**: Add value to songs stored and sort by it to list most popular songs at the top. 
 
 ## Contributing
