@@ -15,8 +15,7 @@ export default {
             musicPlayer.stopAndDisconnect();
             bot.musicPlayers.delete(voiceChannel.guild.id);
             return await embedReply(interaction, 'Stopped playing and cleared queue!');
-        } else {
-            return await embedReply(interaction, 'Failed to disconnect: Invalid voice channel or music player.');
         }
+        return result;
 	},
 };
