@@ -2,19 +2,19 @@ import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import embedReply from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 import voiceChannelCheck from '../../utils/voiceChannelCheck';
+import { Queue } from '../../models/queue';
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName('disconnect')
-		.setDescription('Disconnects the bot from voice channel.'),
+		.setName('stop')
+		.setDescription('Stops and clears the queue.'),
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
         const result = await voiceChannelCheck(bot, interaction);
-        if ('voiceChannel' in result && 'musicPlayer' in result) {
-            const { voiceChannel, musicPlayer } = result;
+        if ('musicPlayer' in result) {
+            const { musicPlayer } = result;
 
-            musicPlayer.stopAndDisconnect();
-            bot.musicPlayers.delete(voiceChannel.guild.id);
-            return await embedReply(interaction, 'Stopped playing, cleared the queue and disconnected!');
+            musicPlayer.stopAndClear();
+            return await embedReply(interaction, 'Stopped playing and cleared queue!');
         }
         return result;
 	},

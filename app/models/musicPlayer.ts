@@ -82,6 +82,11 @@ export class MusicPlayer {
         this.player.stop(true);
     }
 
+    public stopAndClear() {
+        this.queue = new Queue();
+        this.stopPlaying();
+    }
+
     public stopAndDisconnect() {
         this.queue = new Queue();
         this.connection.destroy();
