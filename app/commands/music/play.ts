@@ -29,9 +29,14 @@ export default {
             choice.artist.toLowerCase().includes(focusedValue.toLowerCase()) ||
             focusedValue.toLowerCase().includes(choice.source.toLowerCase())
         ).sort((a, b) => b.timesPlayed - a.timesPlayed);
-		await interaction.respond(
-			filtered.map(choice => ({ name: choice.title + ' - ' + choice.artist + ' | ' + getDuration(choice.duration), value: choice.ytId })),
-		);
+
+        const filteredObjects = filtered.map(choice => ({ name: choice.title + ' - ' + choice.artist + ' | ' + getDuration(choice.duration), value: choice.ytId }));
+
+        filteredObjects.forEach((obj) => {
+            console.log(obj.name + " | length: " + obj.name.length + " | " + obj.value + " |  length: " + obj.value.length);
+        });
+
+		await interaction.respond(filteredObjects);
 	},
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
         const deferMessage = await interaction.deferReply().catch(console.error);
@@ -48,11 +53,6 @@ export default {
         if (!fetchedSong) {
             let newSongDetails = await fetchSongMetadata(song ?? '', interaction.user.username);
             if (newSongDetails) {
-                await newSongDetails.save()
-                    .catch((error) => {
-                        console.error('Error saving song to database:', error);
-                        return embedReply(interaction, 'Failed to save song to database.');
-                    });
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
                 const command = `yt-dlp -x --audio-format mp3 -o "${newSongDetails.path}" "${newSongDetails.source}"`;
                 await execPromise(command)
@@ -70,6 +70,11 @@ export default {
                     .catch((error) => {
                         console.error('Error executing command:', error);
                         return embedReply(interaction, 'Failed to download the song.');
+                    });
+                await newSongDetails.save()
+                    .catch((error) => {
+                        console.error('Error saving song to database:', error);
+                        return embedReply(interaction, 'Failed to save song to database.');
                     });
                 await deferMessage?.delete().catch(console.error);
                 return;
