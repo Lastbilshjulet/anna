@@ -2,7 +2,7 @@
     "name": "discord-anna-bot",
     "main": "app/index.ts",
     "scripts": {
-        "start": "npm run build && pm2 start ./dist/index.js --name \"anna-bot\" --time",
+        "start": "npm run build && pm2 start ecosystem.config.js",
         "dev": "npm run build && node ./dist/index.js",
         "build": "npx tsc",
         "lint": "eslint . --ext .ts",

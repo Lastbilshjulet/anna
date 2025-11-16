@@ -1,8 +1,10 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, Unique } from 'sequelize-typescript';
 import { Song } from '../interfaces/song';
+import { getDuration } from '../../utils/embedReply';
 
 @Table({ timestamps: true, tableName: 'songs' })
 class SongEntity extends Model<Song> {
+    @Unique
     @Column(DataType.STRING)
     declare ytId: string;
 
@@ -29,6 +31,10 @@ class SongEntity extends Model<Song> {
 
     @Column(DataType.INTEGER)
     declare timesPlayed: number;
+
+    public toString(): string {
+        return `${this.ytId} | ${this.title} by ${this.artist} [${getDuration(this.duration)}], played ${this.timesPlayed} times.`;
+    }
 }
 
 export default SongEntity;

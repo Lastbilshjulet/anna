@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, TextChannel, VoiceBasedChannel } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, TextChannel, VoiceBasedChannel, InteractionResponse } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel } from '@discordjs/voice';
 import { video_basic_info } from 'play-dl';
 import { exec } from 'child_process'
@@ -30,16 +30,17 @@ export default {
             focusedValue.toLowerCase().includes(choice.source.toLowerCase())
         ).sort((a, b) => b.timesPlayed - a.timesPlayed);
 
-        const filteredObjects = filtered.map(choice => ({ name: choice.title + ' - ' + choice.artist + ' | ' + getDuration(choice.duration), value: choice.ytId }));
+        const filteredObjects = filtered.map(choice => (
+            {
+                name: ((choice.title + ' - ' + choice.artist).slice(0, 90) + ' | ' + getDuration(choice.duration)).slice(0, 99),
+                value: choice.ytId
+            }
+        ));
 
-        filteredObjects.forEach((obj) => {
-            console.log(obj.name + " | length: " + obj.name.length + " | " + obj.value + " |  length: " + obj.value.length);
-        });
-
-		await interaction.respond(filteredObjects);
+		await interaction.respond(filteredObjects.slice(0, 25));
 	},
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
-        const deferMessage = await interaction.deferReply().catch(console.error);
+        const deferMessage: void|InteractionResponse<boolean> = await interaction.deferReply().catch(console.error);
         const guildMember = interaction.guild!.members.cache.get(interaction.user.id);
         const voiceChannel = guildMember!.voice.channel;
 
@@ -53,8 +54,13 @@ export default {
         if (!fetchedSong) {
             let newSongDetails = await fetchSongMetadata(song ?? '', interaction.user.username);
             if (newSongDetails) {
+                fetchedSong = bot.availableSongs.get(newSongDetails.ytId);
+                if (fetchedSong) {
+                    await saveAndPlaySong(fetchedSong, interaction, bot, voiceChannel, deferMessage);
+                    return;
+                }
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
-                const command = `yt-dlp -x --audio-format mp3 -o "${newSongDetails.path}" "${newSongDetails.source}"`;
+                const command = `yt-dlp -o "${newSongDetails.path}" "${newSongDetails.source}"`;
                 await execPromise(command)
                     .then(({ stdout, stderr }) => {
                         if (stderr) {
@@ -82,18 +88,21 @@ export default {
                 return await embedReply(interaction, 'Nothing found from query - ' + song);
             }
         }
-        fetchedSong.requestedBy = interaction.user.username;
-        fetchedSong.timesPlayed += 1;
-        await updateSong(fetchedSong, bot);
-
-        await fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, fetchedSong!);
-        await deferMessage?.delete().catch(console.error);
+        await saveAndPlaySong(fetchedSong, interaction, bot, voiceChannel, deferMessage);
 	},
 };
+
+async function saveAndPlaySong(fetchedSong: Song, interaction: ChatInputCommandInteraction, bot: Bot, voiceChannel: VoiceBasedChannel, deferMessage: void|InteractionResponse<boolean>) {
+    await updateSong(fetchedSong, bot);
+
+    await fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, fetchedSong!);
+    await deferMessage?.delete().catch(console.error);
+}
 
 async function updateSong(fetchedSong: Song, bot: Bot) {
     const songEntity = await SongEntity.findOne({ where: { ytId: fetchedSong.ytId } });
     if (songEntity) {
+        songEntity.timesPlayed += 1;
         await songEntity.save();
         bot.availableSongs.set(fetchedSong.ytId, songEntity);
         console.log(`Updated song: ${songEntity.title}, Times Played: ${songEntity.timesPlayed}`);
@@ -104,12 +113,16 @@ async function updateSong(fetchedSong: Song, bot: Bot) {
 
 async function execPromise(command: string): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                return reject(error);
+        exec(
+            command,
+            {windowsHide: true},
+            (error, stdout, stderr) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve({ stdout, stderr });
             }
-            resolve({ stdout, stderr });
-        });
+        );
     });
 }
 
@@ -121,6 +134,7 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
         if (musicPlayer.connection.joinConfig.channelId !== voiceChannel.id) {
             return embedSend(interaction.channel! as TextChannel, 'You need to be connected to the same voice channel as the bot!');
         }
+        bot.availableSongs.set(fetchedSong!.ytId, fetchedSong!);
         musicPlayer.play(fetchedSong!);
         return;
     }
@@ -132,7 +146,8 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
             channelId: voiceChannel.id,
             guildId: guildId,
             adapterCreator: voiceChannel.guild.voiceAdapterCreator as DiscordGatewayAdapterCreator
-        })
+        }),
+        bot
     );
     bot.musicPlayers.set(guildId, musicPlayer);
     bot.availableSongs.set(fetchedSong!.ytId, fetchedSong!);
