@@ -111,9 +111,11 @@ export class MusicPlayer {
 
         if (!song) {
             this.queue = new Queue();
+            this.shouldLeave = true;
             return embedSend(this.textChannel, `All songs have been played, queue something new to reset.`);
         }
         
+        this.shouldLeave = false;
         this.currentResouce = createAudioResource(song!.path, { inlineVolume: true });
         this.currentResouce.volume!.setVolume(0.1);
         this.player.play(this.currentResouce);
