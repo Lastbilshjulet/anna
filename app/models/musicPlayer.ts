@@ -3,11 +3,14 @@ import { VoiceConnectionState, VoiceConnectionStatus, createAudioResource, Audio
 import { Queue } from "./queue.js";
 import { Song } from "./interfaces/song.js";
 import { embedSend } from "../utils/embedReply.js";
+import SongEntity from "./entities/songEntity.js";
+import { Bot } from "./bot.js";
 
 export class MusicPlayer {
     public guild: Guild;
     public interaction: CommandInteraction;
     public connection: VoiceConnection;
+    public bot: Bot;
     public player: AudioPlayer;
     public textChannel: TextChannel;
     public queue: Queue;
@@ -20,11 +23,13 @@ export class MusicPlayer {
         interaction: CommandInteraction,
         textChannel: TextChannel,
         connection: VoiceConnection,
+        bot: Bot
     ) {
         this.guild = guild;
         this.interaction = interaction;
         this.textChannel = textChannel;
         this.connection = connection;
+        this.bot = bot;
         this.player = createAudioPlayer({
             behaviors: {
                 noSubscriber: NoSubscriberBehavior.Pause,
@@ -45,9 +50,7 @@ export class MusicPlayer {
 
         this.dcInterval = setInterval(() => {
             if (this.shouldLeave && this.connection.state.status === VoiceConnectionStatus.Ready && this.player.state.status === AudioPlayerStatus.Idle) {
-                this.textChannel.send('Nothing is playing! Leaving voice channel...')
-                    .then((msg) => setTimeout(() => msg.delete(), 30_000))
-                    .catch(console.error);
+                embedSend(interaction.channel! as TextChannel, 'Nothing is playing! Leaving voice channel...');
                 this.connection.destroy();
                 this.player.stop(true);
             }
@@ -95,22 +98,26 @@ export class MusicPlayer {
     }
 
     private processQueue() {
+        if (this.player.state.status !== AudioPlayerStatus.Idle) {
+            return;
+        }
+        
+        let song: Song | undefined;
         if (this.queue.isEmpty()) {
-            this.shouldLeave = true;
-            return embedSend(this.textChannel, "Queue is empty!");
+            song = this.queue.getNotPlayedSong(this.bot.availableSongs);
+        } else {
+            song = this.queue.pop();
         }
-        this.shouldLeave = false;
-        let message = "Adding to queue...";
-        let song = this.queue.getLastSong();
-        if (this.player.state.status === AudioPlayerStatus.Idle) {
-            const newSong = this.queue.pop();
-            this.currentResouce = createAudioResource(newSong!.path, { inlineVolume: true });
-            this.currentResouce.volume!.setVolume(0.1);
-            this.player.play(this.currentResouce);
-            message = `Now playing...`;
-            console.log(`Playing: ${newSong!.title} - ${newSong!.artist}. Duration: ${newSong!.duration}s. Requested by: ${newSong!.requestedBy}. Source: ${newSong!.source}. Path: ${newSong!.path}. Times played: ${newSong!.timesPlayed}`);
-            song = newSong ?? null;
+
+        if (!song) {
+            this.queue = new Queue();
+            return embedSend(this.textChannel, `All songs have been played, queue something new to reset.`);
         }
-        return embedSend(this.textChannel, message, song);
+        
+        this.currentResouce = createAudioResource(song!.path, { inlineVolume: true });
+        this.currentResouce.volume!.setVolume(0.1);
+        this.player.play(this.currentResouce);
+        console.log(`Playing: ${song!.title} - ${song!.artist}. Duration: ${song!.duration}s. Requested by: ${song!.requestedBy}. Source: ${song!.source}. Path: ${song!.path}. Times played: ${song!.timesPlayed}`);
+        return embedSend(this.textChannel, `Now playing...`, song!);
     }
 }

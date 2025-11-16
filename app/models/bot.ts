@@ -61,10 +61,12 @@ export class Bot {
     private async fetchStoredSongs() {
         const songs = await SongEntity.findAll();
         console.log("Fetched songs from db: " + songs.length);
+        console.log("----------------------------------------");
         for (const song of songs) {
             this.availableSongs.set(song.ytId, song);
-            console.log("Fetched song from db: " + song.title);
+            console.log(song.toString());
         }
+        console.log("----------------------------------------");
     }
 
     private async registerSlashCommands() {

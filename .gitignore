@@ -136,4 +136,6 @@ dist
 .pnp.*
 
 songs/**/*.mp3
+songs/**/*.ogg
 database.sqlite
+ecosystem.config.js
