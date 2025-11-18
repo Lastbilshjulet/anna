@@ -51,14 +51,22 @@ export class Queue {
     public getNotPlayedSong(availableSongs: Collection<string, Song>): Song|undefined {
         const playedIds = new Set(this.history.map(s => s.ytId));
         const autoPlayIds = new Set(this.autoPlayHistory.map(s => s.ytId));
-        let candidates = Array.from(availableSongs.values()).filter(s => !playedIds.has(s.ytId) && !autoPlayIds.has(s.ytId));
+        let candidates = Array.from(availableSongs.values()).filter(s => !playedIds.has(s.ytId) && !autoPlayIds.has(s.ytId) && s.autoplay);
+        
+        console.log("----------------------------------------");
+        console.log("AutoPlay - Available songs: " + availableSongs.size);
+        console.log("AutoPlay - Played songs: " + playedIds.size);
+        console.log("AutoPlay - AutoPlay history songs: " + autoPlayIds.size);
+        console.log("AutoPlay - Candidates found: " + candidates.length);
 
         if (candidates.length > 0) {
             const rand = Math.floor(Math.random() * candidates.length);
+            console.log("AutoPlay - randNum: " + rand);
             const chosen = candidates[rand];
             this.autoPlayHistory.push(chosen);
             return chosen;
         }
+        console.log("----------------------------------------");
         
         return undefined
     }

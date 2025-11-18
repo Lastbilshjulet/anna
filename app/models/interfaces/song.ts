@@ -8,4 +8,5 @@ export interface Song {
     requestedBy: string;
     duration: number;
     timesPlayed: number;
+    autoplay: boolean;
 };

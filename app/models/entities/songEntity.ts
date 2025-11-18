@@ -32,8 +32,11 @@ class SongEntity extends Model<Song> {
     @Column(DataType.INTEGER)
     declare timesPlayed: number;
 
+    @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
+    declare autoplay: boolean;
+
     public toString(): string {
-        return `${this.ytId} | ${this.title} by ${this.artist} [${getDuration(this.duration)}], played ${this.timesPlayed} times.`;
+        return `${this.ytId} | ${this.title} by ${this.artist} [${getDuration(this.duration)}], autoplay: ${this.autoplay}, played ${this.timesPlayed} times.`;
     }
 }
 

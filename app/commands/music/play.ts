@@ -82,7 +82,6 @@ export default {
                         console.error('Error saving song to database:', error);
                         return embedReply(interaction, 'Failed to save song to database.');
                     });
-                await deferMessage?.delete().catch(console.error);
                 return;
             } else {
                 return await embedReply(interaction, 'Nothing found from query - ' + song);
@@ -105,7 +104,7 @@ async function updateSong(fetchedSong: Song, bot: Bot) {
         songEntity.timesPlayed += 1;
         await songEntity.save();
         bot.availableSongs.set(fetchedSong.ytId, songEntity);
-        console.log(`Updated song: ${songEntity.title}, Times Played: ${songEntity.timesPlayed}`);
+        console.log(`Updated song: ${songEntity.title} | ${songEntity.title}, Times Played: ${songEntity.timesPlayed}`);
     } else {
         console.error(`Song with ytId ${fetchedSong.ytId} not found in the database.`);
     }
@@ -132,7 +131,7 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
 
     if (musicPlayer) {
         if (musicPlayer.connection.joinConfig.channelId !== voiceChannel.id) {
-            return embedSend(interaction.channel! as TextChannel, 'You need to be connected to the same voice channel as the bot!');
+            return embedReply(interaction, 'You need to be connected to the same voice channel as the bot!');
         }
         bot.availableSongs.set(fetchedSong!.ytId, fetchedSong!);
         musicPlayer.play(fetchedSong!);
@@ -189,6 +188,7 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 duration: metadata.duration,
                 requestedBy: requestedBy,
                 timesPlayed: 0,
+                autoplay: true
             });
         } else {
             let ytInfo;
@@ -209,6 +209,7 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 duration: ytInfo.video_details.durationInSec ?? 0,
                 requestedBy: requestedBy,
                 timesPlayed: 0,
+                autoplay: true
             });
         }
     } catch (error) {
