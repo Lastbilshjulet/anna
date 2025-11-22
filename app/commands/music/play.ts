@@ -61,6 +61,7 @@ export default {
                 }
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
                 const command = `yt-dlp -o "${newSongDetails.path}" "${newSongDetails.source}"`;
+                let successfulDownload: boolean = false;
                 await execPromise(command)
                     .then(({ stdout, stderr }) => {
                         if (stderr) {
@@ -71,17 +72,21 @@ export default {
                         console.log(`stdout: ${stdout}`);
 
                         fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, newSongDetails!);
+                        successfulDownload = true;
                         console.log("Downloading to " + newSongDetails!.path);
                     })
                     .catch((error) => {
                         console.error('Error executing command:', error);
                         return embedReply(interaction, 'Failed to download the song.');
                     });
-                await newSongDetails.save()
-                    .catch((error) => {
-                        console.error('Error saving song to database:', error);
-                        return embedReply(interaction, 'Failed to save song to database.');
-                    });
+                if (successfulDownload) {
+                    await newSongDetails.save()
+                        .catch((error) => {
+                            console.error('Error saving song to database:', error);
+                            return embedReply(interaction, 'Failed to save song to database.');
+                        });
+                    await deferMessage?.delete().catch(console.error);
+                }
                 return;
             } else {
                 return await embedReply(interaction, 'Nothing found from query - ' + song);
