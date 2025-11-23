@@ -1,7 +1,6 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { Bot } from '../../models/bot';
 import voiceChannelCheck from '../../utils/voiceChannelCheck';
-import { Queue } from '../../models/queue';
 import embedReply, { getDuration } from '../../utils/embedReply';
 import { Song } from '../../models/interfaces/song';
 
