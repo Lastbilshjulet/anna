@@ -90,7 +90,7 @@ This project is licensed under the [MIT License](./LICENSE).
 - [ ] **Playlist Support**: Support queuing of playlists from both youtube and spotify. 
 - [ ] **Queue Persistence**: Save and restore the queue state across bot restarts.
 - [ ] **Playlist Management**: Allow users to create, save, and load playlists.
-- [ ] **Unit Tests**: Add unit tests for core functionalities.
+- [x] **Unit Tests**: Add unit tests for core functionalities.
 - [x] **Improve messages**: Use Embeds to improve the style of messages. 
 - [x] **Add Support for SoundCloud Playback**: Extend the `/play` command to handle SoundCloud URLs.
 - [x] **Order autocomplete by popularity**: Add value to songs stored and sort by it to list most popular songs at the top. 
