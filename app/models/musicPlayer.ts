@@ -3,7 +3,6 @@ import { VoiceConnectionState, VoiceConnectionStatus, createAudioResource, Audio
 import { Queue } from "./queue.js";
 import { Song } from "./interfaces/song.js";
 import { embedSend } from "../utils/embedReply.js";
-import SongEntity from "./entities/songEntity.js";
 import { Bot } from "./bot.js";
 
 export class MusicPlayer {

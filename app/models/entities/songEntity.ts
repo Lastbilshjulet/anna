@@ -36,7 +36,18 @@ class SongEntity extends Model<Song> {
     declare autoplay: boolean;
 
     public toString(): string {
-        return `${this.ytId} | ${this.title} by ${this.artist} [${getDuration(this.duration)}], autoplay: ${this.autoplay}, played ${this.timesPlayed} times.`;
+        const TIMES_WIDTH = 2;
+        const AUTOPLAY_WIDTH = 5;
+        const DURATION_WIDTH = 7;
+
+        const yt = this.ytId ?? '';
+        const duration = getDuration(this.duration ?? 0).padEnd(DURATION_WIDTH);
+        const autoplayStr = (this.autoplay ? 'true' : 'false').padEnd(AUTOPLAY_WIDTH);
+        const timesStr = String(this.timesPlayed ?? 0).padStart(TIMES_WIDTH);
+
+        const titleArtist = `${this.artist ?? ''} - ${this.title ?? ''}`;
+
+        return `${yt} | autoplay: ${autoplayStr} | played: ${timesStr} | ${titleArtist}, ${duration}`;
     }
 }
 
