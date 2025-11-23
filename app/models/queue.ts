@@ -70,4 +70,12 @@ export class Queue {
         
         return undefined
     }
+
+    public getUpcomingTenSongs(): Array<Song> {
+        return this.songs.slice(0, 10);
+    }
+
+    public getQueueSize(): number {
+        return this.songs.length;
+    }
 };

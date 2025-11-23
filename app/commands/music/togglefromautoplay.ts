@@ -32,7 +32,7 @@ export default {
         await interaction.respond(filteredObjects.slice(0, 25));
     },
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
-        const deferMessage: void|InteractionResponse<boolean> = await interaction.deferReply().catch(console.error);
+        await interaction.deferReply().catch(console.error);
 
         const song = interaction.options.getString('song');
         let songToRemove: Song | undefined = bot.availableSongs.get(song ?? '');
