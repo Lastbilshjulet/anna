@@ -1,7 +1,6 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { Bot } from '../../models/bot';
 import voiceChannelCheck from '../../utils/voiceChannelCheck';
-import { Queue } from '../../models/queue';
 import embedReply, { getDuration } from '../../utils/embedReply';
 import { Song } from '../../models/interfaces/song';
 
@@ -29,8 +28,8 @@ export default {
             .setDescription(`Next ${queuedSongs.length} song(s) in the queue from ${musicPlayer.queue.getQueueSize()} total.`)
             .addFields(
                 queuedSongs.map((song, index) => ({
-                    name: `${index + 1}. [${song.title} - ${song.artist}](${song.source})`,
-                    value: `Duration: ${getDuration(song.duration)} | Requested by: ${song.requestedBy}`,
+                    name: `${index + 1}. ${song.title} - ${song.artist}`,
+                    value: `Duration: ${getDuration(song.duration)} | Requested by: ${song.requestedBy} | [Source](${song.source})`,
                 }))
             )
             .setTimestamp()
