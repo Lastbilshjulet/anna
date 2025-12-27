@@ -11,6 +11,7 @@ import { isYoutubeVideo, isSoundcloud, isMobileSoundcloud, isSpotifyURL } from '
 import { Song } from '../../models/interfaces/song';
 import embedReply, { embedSend, getDuration } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
+import { config } from '../../utils/config';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -60,7 +61,8 @@ export default {
                     return;
                 }
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
-                const command = `yt-dlp -o "${newSongDetails.path}" "${newSongDetails.source}"`;
+                const songPath = config.mountPath + newSongDetails.path + ".mp3";
+                const command = `yt-dlp -o "${songPath}" "${newSongDetails.source}"`;
                 let successfulDownload: boolean = false;
                 await execPromise(command)
                     .then(({ stdout, stderr }) => {
@@ -160,7 +162,6 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
 
 async function fetchSongMetadata(song: string, requestedBy: string) {
     try {
-        const songsDir = join(__dirname, "..", "..", "..", "songs");
         if (isSoundcloud.test(song) || isMobileSoundcloud.test(song) || isSpotifyURL.test(song)) {
             const browser = await puppeteer.launch();
             const page = await browser.newPage();
@@ -182,13 +183,13 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
             });
             await browser.close();
 
-            const formattedTitle = (metadata.title ?? '').replace(/[^a-zA-Z0-9]/g, "_") + '.mp3';
+            const formattedTitle = (metadata.title ?? '').replace(/[^a-zA-Z0-9]/g, "_");
             return SongEntity.build({
                 ytId: metadata.id ?? '',
                 title: metadata.title ?? '',
                 artist: metadata.artist ?? '',
                 source: song ?? '',
-                path: join(songsDir, formattedTitle),
+                path: join(formattedTitle),
                 thumbnail: metadata.thumbnail ?? '',
                 duration: metadata.duration,
                 requestedBy: requestedBy,
@@ -203,14 +204,14 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 const searchResult = await YouTube.searchOne(song);
                 ytInfo = await video_basic_info(searchResult.id ?? '');
             }
-            const title = (ytInfo.video_details.title ?? '').replace(/[^a-zA-Z0-9]/g, "_") + '.mp3';
+            const title = (ytInfo.video_details.title ?? '').replace(/[^a-zA-Z0-9]/g, "_");
             return SongEntity.build({
                 ytId: ytInfo.video_details.id ?? '',
                 title: ytInfo.video_details.title ?? '',
                 artist: ytInfo.video_details.channel?.name ?? '',
                 source: ytInfo.video_details.url ?? '',
-                path: join(songsDir, title),
-                thumbnail: ytInfo.video_details.thumbnails[0]!.url ?? '',
+                path: title,
+                thumbnail: ytInfo.video_details.thumbnails[0]?.url ?? '',
                 duration: ytInfo.video_details.durationInSec ?? 0,
                 requestedBy: requestedBy,
                 timesPlayed: 0,

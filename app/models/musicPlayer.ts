@@ -4,6 +4,7 @@ import { Queue } from "./queue.js";
 import { Song } from "./interfaces/song.js";
 import { embedSend } from "../utils/embedReply.js";
 import { Bot } from "./bot.js";
+import { config } from "../utils/config.js";
 
 export class MusicPlayer {
     public guild: Guild;
@@ -63,7 +64,11 @@ export class MusicPlayer {
     public play(song: Song) {
         this.queue.push(song);
         console.log(`Added to queue: ${song.title}`);
-        this.processQueue();
+        if (this.player.state.status === AudioPlayerStatus.Idle) {
+            this.processQueue();
+        } else {
+            embedSend(this.textChannel, `Added to queue...`, song!);
+        }
     }
 
     public volume(volumeDiff: number|null = null) {
@@ -97,10 +102,6 @@ export class MusicPlayer {
     }
 
     private processQueue() {
-        if (this.player.state.status !== AudioPlayerStatus.Idle) {
-            return;
-        }
-        
         let song: Song | undefined;
         if (this.queue.isEmpty()) {
             song = this.queue.getNotPlayedSong(this.bot.availableSongs);
@@ -115,10 +116,18 @@ export class MusicPlayer {
         }
         
         this.shouldLeave = false;
-        this.currentResouce = createAudioResource(song!.path, { inlineVolume: true });
+        const songPath = config.mountPath + this.normalizeSongName(song.path) + ".mp3";
+        this.currentResouce = createAudioResource(songPath, { inlineVolume: true });
         this.currentResouce.volume!.setVolume(0.1);
         this.player.play(this.currentResouce);
         console.log(`Playing: ${song!.title} - ${song!.artist}. Duration: ${song!.duration}s. Requested by: ${song!.requestedBy}. Source: ${song!.source}. Path: ${song!.path}. Times played: ${song!.timesPlayed}`);
         return embedSend(this.textChannel, `Now playing...`, song!);
+    }
+
+    private normalizeSongName(input: string): string {
+        const parts = input.replace(/\\/g, '/').split('/');
+        const filename = parts.pop() ?? '';
+        const dot = filename.lastIndexOf('.');
+        return dot > 0 ? filename.substring(0, dot) : filename;
     }
 }
