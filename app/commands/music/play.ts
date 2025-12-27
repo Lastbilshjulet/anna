@@ -62,7 +62,7 @@ export default {
                 }
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
                 const songPath = config.mountPath + newSongDetails.path + ".mp3";
-                const command = `yt-dlp -o "${songPath}" "${newSongDetails.source}"`;
+                const command = `yt-dlp -x --audio-format mp3 -o "${songPath}" "${newSongDetails.source}"`;
                 let successfulDownload: boolean = false;
                 await execPromise(command)
                     .then(({ stdout, stderr }) => {
