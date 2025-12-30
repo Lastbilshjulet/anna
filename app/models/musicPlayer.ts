@@ -103,8 +103,10 @@ export class MusicPlayer {
 
     private processQueue() {
         let song: Song | undefined;
+        let isAutoplayed = false;
         if (this.queue.isEmpty()) {
             song = this.queue.getNotPlayedSong(this.bot.availableSongs);
+            isAutoplayed = true;
         } else {
             song = this.queue.pop();
         }
@@ -121,7 +123,7 @@ export class MusicPlayer {
         this.currentResouce.volume!.setVolume(0.1);
         this.player.play(this.currentResouce);
         console.log(`Playing: ${song!.title} - ${song!.artist}. Duration: ${song!.duration}s. Requested by: ${song!.requestedBy}. Source: ${song!.source}. Path: ${song!.path}. Times played: ${song!.timesPlayed}`);
-        return embedSend(this.textChannel, `Now playing...`, song!);
+        return embedSend(this.textChannel, `${isAutoplayed ? 'Auto-played...' : 'Now playing...'}`, song!);
     }
 
     private normalizeSongName(input: string): string {
