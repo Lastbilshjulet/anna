@@ -123,7 +123,7 @@ export class MusicPlayer {
         this.currentResouce.volume!.setVolume(0.1);
         this.player.play(this.currentResouce);
         console.log(`Playing: ${song!.title} - ${song!.artist}. Duration: ${song!.duration}s. Requested by: ${song!.requestedBy}. Source: ${song!.source}. Path: ${song!.path}. Times played: ${song!.timesPlayed}`);
-        return embedSend(this.textChannel, `${isAutoplayed ? 'Auto-played...' : 'Now playing...'}`, song!);
+        return embedSend(this.textChannel, isAutoplayed ? 'Auto-playing...' : 'Now playing...', song!);
     }
 
     private normalizeSongName(input: string): string {
