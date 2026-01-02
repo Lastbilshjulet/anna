@@ -29,6 +29,7 @@ export async function embedSend(textChannel: TextChannel, content: string, song:
     }
     return await textChannel.send({
         embeds: [embed],
+        flags: MessageFlags.SuppressEmbeds,
     }).then((msg) => setTimeout(() => msg.delete().catch(console.error), song && (content === "Now playing..." || content === "Auto-playing...") ? song.duration * 1_000 : 60_000));
 }
 
