@@ -112,7 +112,7 @@ export class Bot {
                 await command.execute(this, interaction);
             } catch (error) {
                 console.error(error);
-                await interaction.reply({ content: "There was an error while executing this command!", flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: "There was an error while executing this command!", flags: MessageFlags.SuppressNotifications });
             }
         });
     }

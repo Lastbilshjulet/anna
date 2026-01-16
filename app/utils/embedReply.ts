@@ -14,7 +14,7 @@ export default async function embedReply(interaction: ChatInputCommandInteractio
     }
     return await interaction.reply({
         embeds: [embed],
-        flags: ephemeral ? MessageFlags.Ephemeral : undefined,
+        flags: MessageFlags.SuppressNotifications,
     }).then((msg) => setTimeout(() => msg.delete().catch(console.error), 60_000));
 }
 
