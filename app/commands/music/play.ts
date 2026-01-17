@@ -4,6 +4,7 @@ import { video_basic_info } from 'play-dl';
 import { exec } from 'child_process'
 import YouTube from 'youtube-sr';
 import { join } from "path";
+import { promises as fs } from 'fs';
 import puppeteer from 'puppeteer';
 import SongEntity from '../../models/entities/songEntity';
 import { MusicPlayer } from '../../models/musicPlayer';
@@ -63,33 +64,28 @@ export default {
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
                 const songPath = config.mountPath + newSongDetails.path + ".mp3";
                 const command = `yt-dlp -x --audio-format mp3 -o "${songPath}" "${newSongDetails.source}"`;
-                let successfulDownload: boolean = false;
-                await execPromise(command)
-                    .then(({ stdout, stderr }) => {
-                        if (stderr) {
-                            console.error(`stderr: ${stderr}`);
-                            return embedReply(interaction, 'Failed to download the song.');
-                        }
-
-                        console.log(`stdout: ${stdout}`);
-
-                        fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, newSongDetails!);
-                        successfulDownload = true;
-                        console.log("Downloading to " + newSongDetails!.path);
-                    })
-                    .catch((error) => {
-                        console.error('Error executing command:', error);
-                        return embedReply(interaction, 'Failed to download the song.');
-                    });
-                if (successfulDownload) {
-                    await newSongDetails.save()
-                        .catch((error) => {
-                            console.error('Error saving song to database:', error);
-                            return embedReply(interaction, 'Failed to save song to database.');
-                        });
-                    await deferMessage?.delete().catch(console.error);
+                try {
+                    const { stdout, stderr } = await execPromise(command);
+                    console.log(`stdout: ${stdout}`);
+                    if (stderr) console.warn(`yt-dlp stderr: ${stderr}`);
+                } catch (error) {
+                    console.error('Error executing command (yt-dlp):', error);
                 }
-                return;
+
+                const downloadValid = await verifyDownloadFile(songPath, 10000);
+                if (!downloadValid) {
+                    console.error(`Download not valid or file missing: ${songPath}`);
+                    return embedReply(interaction, 'Failed to download the song.');
+                }
+
+                fetchMusicPlayerAndPlay(bot, interaction, voiceChannel, newSongDetails!);
+                console.log("Downloading to " + config.mountPath + newSongDetails!.path);
+                await newSongDetails.save()
+                    .catch((error) => {
+                        console.error('Error saving song to database:', error);
+                        return embedReply(interaction, 'Failed to save song to database.');
+                    });
+                return await deferMessage?.delete().catch(console.error);
             } else {
                 return await embedReply(interaction, 'Nothing found from query - ' + song);
             }
@@ -130,6 +126,20 @@ async function execPromise(command: string): Promise<{ stdout: string; stderr: s
             }
         );
     });
+}
+
+async function verifyDownloadFile(filePath: string, minBytes = 10000): Promise<boolean> {
+    try {
+        const stats = await fs.stat(filePath);
+        if (!stats.isFile()) return false;
+        if (stats.size < minBytes) {
+            console.warn(`Downloaded file too small (${stats.size} bytes): ${filePath}`);
+            return false;
+        }
+        return true;
+    } catch (err) {
+        return false;
+    }
 }
 
 async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel, fetchedSong: Song) {
