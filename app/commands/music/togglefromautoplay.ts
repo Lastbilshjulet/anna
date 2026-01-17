@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, InteractionResponse } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, InteractionResponse, MessageFlags } from 'discord.js';
 import embedReply, { getDuration } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 import { Song } from '../../models/interfaces/song';
@@ -32,7 +32,7 @@ export default {
         await interaction.respond(filteredObjects.slice(0, 25));
     },
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
-        await interaction.deferReply().catch(console.error);
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(console.error);
 
         const song = interaction.options.getString('song');
         let songToRemove: Song | undefined = bot.availableSongs.get(song ?? '');

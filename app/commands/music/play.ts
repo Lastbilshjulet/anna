@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, TextChannel, VoiceBasedChannel, InteractionResponse } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, TextChannel, VoiceBasedChannel, InteractionResponse, MessageFlags } from 'discord.js';
 import { DiscordGatewayAdapterCreator, joinVoiceChannel } from '@discordjs/voice';
 import { video_basic_info } from 'play-dl';
 import { exec } from 'child_process'
@@ -42,7 +42,7 @@ export default {
 		await interaction.respond(filteredObjects.slice(0, 25));
 	},
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
-        const deferMessage: void|InteractionResponse<boolean> = await interaction.deferReply().catch(console.error);
+        const deferMessage: void|InteractionResponse<boolean> = await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(console.error);
         const guildMember = interaction.guild!.members.cache.get(interaction.user.id);
         const voiceChannel = guildMember!.voice.channel;
 

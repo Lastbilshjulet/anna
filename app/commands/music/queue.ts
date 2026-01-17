@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
 import { Bot } from '../../models/bot';
 import voiceChannelCheck from '../../utils/voiceChannelCheck';
 import embedReply, { getDuration } from '../../utils/embedReply';
@@ -9,7 +9,7 @@ export default {
 		.setName('queue')
 		.setDescription('Prints next ten messages in the queue.'),
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
-        await interaction.deferReply().catch(console.error);
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(console.error);
         const result = await voiceChannelCheck(bot, interaction);
         if (!('musicPlayer' in result)) {
             return await embedReply(interaction, 'No queue could be found');
