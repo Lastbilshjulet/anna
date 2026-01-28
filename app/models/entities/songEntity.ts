@@ -50,7 +50,7 @@ class SongEntity extends Model<Song> {
 
         const titleArtist = `${this.artist ?? ''} - ${this.title ?? ''}`;
 
-        return `${yt} | ${this.extension} autoplay: ${autoplayStr} | played: ${timesStr} | ${titleArtist}, ${duration}`;
+        return `${yt} | autoplay: ${autoplayStr} | played: ${timesStr} | ${titleArtist}, ${duration}`;
     }
 }
 
