@@ -62,8 +62,8 @@ export default {
                     return;
                 }
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
-                const songPath = config.mountPath + newSongDetails.path + ".mp3";
-                const command = `yt-dlp -x --audio-format mp3 -o "${songPath}" "${newSongDetails.source}"`;
+                const songPath = config.mountPath + newSongDetails.path + ".ogg";
+                const command = `yt-dlp -x --audio-format ogg -o "${songPath}" "${newSongDetails.source}"`;
                 try {
                     const { stdout, stderr } = await execPromise(command);
                     console.log(`stdout: ${stdout}`);
