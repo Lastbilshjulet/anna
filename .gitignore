@@ -137,5 +137,6 @@ dist
 
 songs/**/*.mp3
 songs/**/*.ogg
+songs/**/*.opus
 database.sqlite
 ecosystem.config.js
