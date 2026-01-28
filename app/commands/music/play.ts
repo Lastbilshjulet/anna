@@ -14,6 +14,8 @@ import embedReply, { embedSend, getDuration } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 import { config } from '../../utils/config';
 
+const EXTENSION_TO_USE = '.opus'; // Expects to start with .
+
 export default {
 	data: new SlashCommandBuilder()
 		.setName('play')
@@ -62,8 +64,8 @@ export default {
                     return;
                 }
                 console.log("Downloading " + newSongDetails.title + " from " + newSongDetails.source);
-                const songPath = config.mountPath + newSongDetails.path + ".opus";
-                const command = `yt-dlp -x --audio-format opus -o "${songPath}" "${newSongDetails.source}"`;
+                const songPath = config.mountPath + newSongDetails.path + EXTENSION_TO_USE;
+                const command = `yt-dlp -x --audio-format ${EXTENSION_TO_USE.slice(1)} -o "${songPath}" "${newSongDetails.source}"`;
                 try {
                     const { stdout, stderr } = await execPromise(command);
                     console.log(`stdout: ${stdout}`);
@@ -200,6 +202,7 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 artist: metadata.artist ?? '',
                 source: song ?? '',
                 path: join(formattedTitle),
+                extension: EXTENSION_TO_USE,
                 thumbnail: metadata.thumbnail ?? '',
                 duration: metadata.duration,
                 requestedBy: requestedBy,
@@ -221,6 +224,7 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 artist: ytInfo.video_details.channel?.name ?? '',
                 source: ytInfo.video_details.url ?? '',
                 path: title,
+                extension: EXTENSION_TO_USE,
                 thumbnail: ytInfo.video_details.thumbnails[0]?.url ?? '',
                 duration: ytInfo.video_details.durationInSec ?? 0,
                 requestedBy: requestedBy,

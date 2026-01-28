@@ -23,6 +23,9 @@ class SongEntity extends Model<Song> {
     @Column(DataType.STRING)
     declare path: string;
 
+    @Column({ type: DataType.STRING(10), allowNull: false, defaultValue: '.mp3' })
+    declare extension: string;
+
     @Column(DataType.STRING)
     declare requestedBy: string;
 
@@ -47,7 +50,7 @@ class SongEntity extends Model<Song> {
 
         const titleArtist = `${this.artist ?? ''} - ${this.title ?? ''}`;
 
-        return `${yt} | autoplay: ${autoplayStr} | played: ${timesStr} | ${titleArtist}, ${duration}`;
+        return `${yt} | ${this.extension} autoplay: ${autoplayStr} | played: ${timesStr} | ${titleArtist}, ${duration}`;
     }
 }
 

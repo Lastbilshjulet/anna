@@ -118,7 +118,7 @@ export class MusicPlayer {
         }
         
         this.shouldLeave = false;
-        const songPath = config.mountPath + this.normalizeSongName(song.path) + ".opus";
+        const songPath = config.mountPath + this.normalizeSongName(song.path) + song.extension;
         this.currentResouce = createAudioResource(songPath, { inlineVolume: true });
         this.currentResouce.volume!.setVolume(0.1);
         this.player.play(this.currentResouce);

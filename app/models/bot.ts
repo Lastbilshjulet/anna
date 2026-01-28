@@ -44,9 +44,9 @@ export class Bot {
             models: [SongEntity],
             logging: false,
         });
-        await this.sequelize.sync();
-        console.log("Database synchronized successfully.");
-        this.fetchStoredSongs();
+        await this.sequelize.sync({ alter: true });
+        console.log("Database synchronized successfully (alter applied).");
+        await this.fetchStoredSongs();
     }
 
 	getClient() {

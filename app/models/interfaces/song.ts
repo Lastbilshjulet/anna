@@ -5,6 +5,7 @@ export interface Song {
     thumbnail: string;
     source: string;
     path: string;
+    extension: string;
     requestedBy: string;
     duration: number;
     timesPlayed: number;
