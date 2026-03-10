@@ -5,6 +5,7 @@ import { Song } from "./interfaces/song.js";
 import { embedSend } from "../utils/embedReply.js";
 import { Bot } from "./bot.js";
 import { config } from "../utils/config.js";
+import SongEntity from "./entities/songEntity.js";
 
 export class MusicPlayer {
     public guild: Guild;
@@ -61,11 +62,11 @@ export class MusicPlayer {
         return this.connection.state.status === VoiceConnectionStatus.Ready;
     }
 
-    public play(song: Song) {
+    public async play(song: Song) {
         this.queue.push(song);
         console.log(`Added to queue: ${song.title}`);
         if (this.player.state.status === AudioPlayerStatus.Idle) {
-            this.processQueue();
+            await this.processQueue();
         } else {
             embedSend(this.textChannel, `Added to queue...`, song!);
         }
@@ -101,11 +102,27 @@ export class MusicPlayer {
         this.dcInterval.unref();
     }
 
-    private processQueue() {
+    private async updateSong(fetchedSong: Song | undefined, bot: Bot) {
+        if (!fetchedSong)
+            return;
+
+        const songEntity = await SongEntity.findOne({ where: { ytId: fetchedSong.ytId } });
+        if (songEntity) {
+            songEntity.timesAutoPlayed += 1;
+            await songEntity.save();
+            bot.availableSongs.set(fetchedSong.ytId, songEntity);
+            console.log(`Updated song: ${songEntity.title} | ${songEntity.title}, Times Auto-Played: ${songEntity.timesAutoPlayed}`);
+        } else {
+            console.error(`Song with ytId ${fetchedSong.ytId} not found in the database.`);
+        }
+    }
+
+    private async processQueue() {
         let song: Song | undefined;
         let isAutoplayed = false;
         if (this.queue.isEmpty()) {
             song = this.queue.getNotPlayedSong(this.bot.availableSongs);
+            await this.updateSong(song, this.bot);
             isAutoplayed = true;
         } else {
             song = this.queue.pop();

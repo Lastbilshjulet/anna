@@ -153,7 +153,7 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
             return embedReply(interaction, 'You need to be connected to the same voice channel as the bot!');
         }
         bot.availableSongs.set(fetchedSong!.ytId, fetchedSong!);
-        musicPlayer.play(fetchedSong!);
+        await musicPlayer.play(fetchedSong!);
         return;
     }
     musicPlayer = new MusicPlayer(
@@ -169,7 +169,7 @@ async function fetchMusicPlayerAndPlay(bot: Bot, interaction: ChatInputCommandIn
     );
     bot.musicPlayers.set(guildId, musicPlayer);
     bot.availableSongs.set(fetchedSong!.ytId, fetchedSong!);
-    musicPlayer.play(fetchedSong!);
+    await musicPlayer.play(fetchedSong!);
 }
 
 async function fetchSongMetadata(song: string, requestedBy: string) {
@@ -207,7 +207,8 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 duration: metadata.duration,
                 requestedBy: requestedBy,
                 timesPlayed: 0,
-                autoplay: true
+                autoplay: true,
+                timesAutoPlayed: 0
             });
         } else {
             let ytInfo;
@@ -229,7 +230,8 @@ async function fetchSongMetadata(song: string, requestedBy: string) {
                 duration: ytInfo.video_details.durationInSec ?? 0,
                 requestedBy: requestedBy,
                 timesPlayed: 0,
-                autoplay: true
+                autoplay: true,
+                timesAutoPlayed: 0
             });
         }
     } catch (error) {

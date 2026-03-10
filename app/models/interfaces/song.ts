@@ -10,4 +10,5 @@ export interface Song {
     duration: number;
     timesPlayed: number;
     autoplay: boolean;
+    timesAutoPlayed: number;
 };

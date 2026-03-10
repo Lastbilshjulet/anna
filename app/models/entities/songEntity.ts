@@ -35,6 +35,9 @@ class SongEntity extends Model<Song> {
     @Column(DataType.INTEGER)
     declare timesPlayed: number;
 
+    @Column(DataType.INTEGER)
+    declare timesAutoPlayed: number;
+
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
     declare autoplay: boolean;
 
