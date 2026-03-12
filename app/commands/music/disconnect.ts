@@ -9,13 +9,16 @@ export default {
 		.setDescription('Disconnects the bot from voice channel.'),
     async execute(bot: Bot, interaction: ChatInputCommandInteraction) {
         const result = await voiceChannelCheck(bot, interaction);
+
         if ('voiceChannel' in result && 'musicPlayer' in result) {
             const { voiceChannel, musicPlayer } = result;
 
             musicPlayer.stopAndDisconnect();
             bot.musicPlayers.delete(voiceChannel.guild.id);
+        
             return await embedReply(interaction, 'Stopped playing, cleared the queue and disconnected!');
         }
+        
         return result;
 	},
 };

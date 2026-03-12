@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, InteractionResponse, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, MessageFlags } from 'discord.js';
 import embedReply, { getDuration } from '../../utils/embedReply';
 import { Bot } from '../../models/bot';
 import { Song } from '../../models/interfaces/song';
